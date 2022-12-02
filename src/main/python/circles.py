@@ -25,7 +25,7 @@ circle_radius = 200
 play_time = 10
 HEIGHT = 800
 WIDTH = 600
-border_width = 100 # The width of the "orbits" in which the circles will be drawn
+CENTER = (400,300)
 center_x = 400
 center_y = 300
 A_color = (255, 0, 0)
@@ -113,11 +113,9 @@ class Target():
                 x = random.randrange(0, WIDTH, 1)
                 y = random.randrange(0, HEIGHT, 1)
                 center_distance = math.sqrt(math.pow((x-center_x),2) + math.pow((y-center_y),2))
-                if center_distance<initial_radius & i == 0:
+                if center_distance<initial_radius:
                     break
-                if center_distance<initial_radius & i >0:
-                    if center_distance>ball_coordinates[i-1][2]+border_width | center_distance<ball_coordinates[i-1][2]-border_width:
-                        break
+
             type = random.sample(set('ASDF'), 1)
             ball_coordinates += tuple([(x,y,center_distance,type)])
         
@@ -150,7 +148,7 @@ class Target():
                     color = F_color
             if c<current_radius:
                 pygame.draw.circle(view, color, 
-                    (x,y), 10, width=2)                
+                    (x,y), 6, width=2)                
             else:
                 pygame.draw.circle(view, (255,255,255), 
                     (x,y), 5, width=5)

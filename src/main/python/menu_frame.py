@@ -15,16 +15,16 @@ def set_fullscreen(selected: Tuple, value: Any) -> None:
 
 def start_the_game() -> None:
     """
-    Function that starts a game. This is raised by the menu button,
-    here menu can be disabled, etc.
     """
-    global user_name
-    print(f'{user_name.get_value()}, Do the job here!')
+    pygame_menu.events.EXIT
+
+
+
 
 
 menu = pygame_menu.Menu(
     height=300,
-    theme=pygame_menu.themes.THEME_BLUE,
+    theme=pygame_menu.themes.THEME_GREEN,
     title='Concentrate or die!',
     width=400
 )
