@@ -22,11 +22,18 @@ pygame.init()
 
 fps = 60
 circle_radius = 200
-play_time = 2
+play_time = 10
 HEIGHT = 800
 WIDTH = 600
-Target_quantity = 10
-circle_active = False
+border_width = 100 # The width of the "orbits" in which the circles will be drawn
+center_x = 400
+center_y = 300
+A_color = (255, 0, 0)
+S_color = (0, 255, 0)
+D_color = (0, 0, 255)
+F_color = (255, 255, 0)
+Target_quantity = 15
+circle_active = True
 
 screen_res = HEIGHT, WIDTH
 # fonte = font.SysFont('comicsans', 50)
@@ -97,21 +104,29 @@ class Target():
     global initial_radius
     def __init__(self, quantity = Target_quantity, variations = 4):
         super().__init__()
+        global ball_coordinates
         ball_coordinates = tuple()
 
         for i in range(Target_quantity):
-            center_x = WIDTH/2
-            center_y = HEIGHT/2
+
             while True:                
                 x = random.randrange(0, WIDTH, 1)
                 y = random.randrange(0, HEIGHT, 1)
                 center_distance = math.sqrt(math.pow((x-center_x),2) + math.pow((y-center_y),2))
-                if center_distance<initial_radius:
+                if center_distance<initial_radius & i == 0:
                     break
-                
-            ball_coordinates += list([x,y])
+                if center_distance<initial_radius & i >0:
+                    if center_distance>ball_coordinates[i-1][2]+border_width | center_distance<ball_coordinates[i-1][2]-border_width:
+                        break
+            type = random.sample(set('ASDF'), 1)
+            ball_coordinates += tuple([(x,y,center_distance,type)])
+        
+        
 
-        print(ball_coordinates)
+
+
+        # print(ball_coordinates)
+        #for x,y,c,t in ball_coordinates: print(x,y,c,t)
 
 
 
@@ -121,7 +136,24 @@ class Target():
         #     center=(400, 300)
         # )
 
-#     def update(self):
+    def update(self):
+        for x,y, c, t in ball_coordinates:
+            color = A_color
+            match t:
+                case ['A']:
+                    color = A_color
+                case ['S']:
+                    color = S_color
+                case ['D']:
+                    color = D_color
+                case ['F']:
+                    color = F_color
+            if c<current_radius:
+                pygame.draw.circle(view, color, 
+                    (x,y), 10, width=2)                
+            else:
+                pygame.draw.circle(view, (255,255,255), 
+                    (x,y), 5, width=5)
 
 
 
@@ -157,4 +189,5 @@ while True:
     frame +=1
     main_circle.update()
     game_time.update()
+    ball_target.update()
     display.update()
