@@ -21,13 +21,12 @@ random.seed(8)
 pygame.init()
 
 fps = 60
-circle_radius = 200
-play_time = 10
-HEIGHT = 800
-WIDTH = 600
-CENTER = (400,300)
-center_x = 400
-center_y = 300
+initial_radius = 180
+circle_radius = 180
+play_time = 20
+HEIGHT = 900
+WIDTH = 900
+CENTER = (450,450)
 A_color = (255, 0, 0)
 S_color = (0, 255, 0)
 D_color = (0, 0, 255)
@@ -36,8 +35,6 @@ Target_quantity = 15
 circle_active = True
 
 screen_res = HEIGHT, WIDTH
-# fonte = font.SysFont('comicsans', 50)
-# fonte_perdeu = font.SysFont('comicsans', 300)
 
 view = display.set_mode(
     size=screen_res,
@@ -90,7 +87,9 @@ class Shrinking_circle(Sprite):
         #self.rect.x -= 0.1
 
         pygame.draw.circle(view, (255,255,255), 
-            (400,300), current_radius, width=3) 
+            CENTER, current_radius, width=3) 
+        pygame.draw.circle(view, (255,255,255),
+            CENTER, 3, width=3)
         #if self.rect.x == 0:
            # self.kill()
             #perdeu = True
@@ -102,22 +101,32 @@ class Shrinking_circle(Sprite):
 
 class Target():
     global initial_radius
+    global orbits
+    orbits = 0
     def __init__(self, quantity = Target_quantity, variations = 4):
         super().__init__()
         global ball_coordinates
+        global orbit_space
         ball_coordinates = tuple()
 
         for i in range(Target_quantity):
+            # Set orbits coordinates
+            orbit_space = initial_radius/(Target_quantity+1)
+            x = CENTER[0] + (i+1)*orbit_space
+            y = CENTER[1]
+            angle = random.uniform(0, 2*math.pi)
+            center_distance = math.sqrt(math.pow((x-CENTER[0]),2) + math.pow((y-CENTER[1]),2))
+            speed = randint(-1, 2)
 
-            while True:                
-                x = random.randrange(0, WIDTH, 1)
-                y = random.randrange(0, HEIGHT, 1)
-                center_distance = math.sqrt(math.pow((x-center_x),2) + math.pow((y-center_y),2))
-                if center_distance<initial_radius:
-                    break
+            # while True:                
+            #     x = random.randrange(0, WIDTH, 1)
+            #     y = random.randrange(0, HEIGHT, 1)
+            #     if center_distance<initial_radius:
+            #         break
 
             type = random.sample(set('ASDF'), 1)
-            ball_coordinates += tuple([(x,y,center_distance,type)])
+            ball_coordinates += tuple([(center_distance,angle,type,speed,i)])
+        print(ball_coordinates)
         
         
 
@@ -135,9 +144,17 @@ class Target():
         # )
 
     def update(self):
-        for x,y, c, t in ball_coordinates:
+        global orbits
+        global remaining_time
+        time_factor =(play_time-remaining_time)/play_time
+        orbits = orbits+0.5/fps
+        if orbits>360:
+            orbits = 0
+        for center, angle, type, speed, index in ball_coordinates:
+            index_factor = (Target_quantity-index)/Target_quantity
+            time_index = index_factor*time_factor
             color = A_color
-            match t:
+            match type:
                 case ['A']:
                     color = A_color
                 case ['S']:
@@ -146,12 +163,18 @@ class Target():
                     color = D_color
                 case ['F']:
                     color = F_color
-            if c<current_radius:
+            if center<current_radius:
+                #x = CENTER[0] - ((index+1)*orbit_space)*pow(math.cos(orbits+angle),2)
+                #y = CENTER[1] - ((index+1)*orbit_space)*pow(math.sin(orbits+angle),2)
+                x = CENTER[0] - ((index+1)*orbit_space)*math.cos((orbits+angle)*speed)
+                y = CENTER[1] - ((index+1)*orbit_space)*math.sin((orbits+angle)*speed)
                 pygame.draw.circle(view, color, 
                     (x,y), 6, width=2)                
-            else:
-                pygame.draw.circle(view, (255,255,255), 
-                    (x,y), 5, width=5)
+            # else:
+            #     # x = CENTER[0] - ((index+1)*orbit_space)*math.cos((orbits+angle)*(speed*time_index))
+            #     # y = CENTER[1] - ((index+1)*orbit_space)*math.sin((orbits+angle)*(speed*time_index))
+            #     pygame.draw.circle(view, (255*time_factor,255*time_index,255*index_factor), 
+            #         (x,y), 5, width=5)
 
 
 
