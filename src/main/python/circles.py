@@ -79,14 +79,18 @@ class Shrinking_circle(Sprite):
         # )
 
     def update(self):
+        global remaining_time
+        time_factor =remaining_time/play_time
         global current_radius
         global initial_radius
 
         if circle_active:
             current_radius -= initial_radius/(play_time*fps)
+            color = (255, 255*time_factor, 255*time_factor)
+
         #self.rect.x -= 0.1
 
-        pygame.draw.circle(view, (255,255,255), 
+        pygame.draw.circle(view, color, 
             CENTER, current_radius, width=3) 
         pygame.draw.circle(view, (255,255,255),
             CENTER, 3, width=3)
@@ -116,7 +120,7 @@ class Target():
             y = CENTER[1]
             angle = random.uniform(0, 2*math.pi)
             center_distance = math.sqrt(math.pow((x-CENTER[0]),2) + math.pow((y-CENTER[1]),2))
-            speed = randint(-1, 2)
+            speed = randint(-2, 2)
 
             # while True:                
             #     x = random.randrange(0, WIDTH, 1)
