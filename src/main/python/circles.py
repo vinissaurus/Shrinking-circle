@@ -31,8 +31,10 @@ A_color = (255, 0, 0)
 S_color = (0, 255, 0)
 D_color = (0, 0, 255)
 F_color = (255, 255, 0)
-Target_quantity = 15
+Target_quantity = 20
 circle_active = True
+key_tolerance = 100
+score = 0
 
 screen_res = HEIGHT, WIDTH
 
@@ -48,16 +50,19 @@ display.set_caption(
 class Remaining_time():
     def __init__(self, time_s):
         global remaining_time 
+
         super().__init__()
         remaining_time = time_s
 
     def update(self):
         global remaining_time 
+        global scoredsaf
         remaining_time -= 1/fps
         # print(remaining_time)
 
         if remaining_time <= 0:
             # self.kill()
+            print('Game Over: {}'.format(score))
             pygame.quit()
             exit()
 
@@ -80,15 +85,28 @@ class Shrinking_circle(Sprite):
 
     def update(self):
         global remaining_time
-        time_factor =remaining_time/play_time
         global current_radius
         global initial_radius
+        global ball_coordinates
+        global orbit_space
 
+        color = (255,255,255)
         if circle_active:
             current_radius -= initial_radius/(play_time*fps)
-            color = (255, 255*time_factor, 255*time_factor)
 
-        #self.rect.x -= 0.1
+        for center, _, type, _, _ in ball_coordinates:
+            if current_radius<center+orbit_space:
+                match type:
+                    case ['A']:
+                        color = A_color
+                    case ['S']:
+                        color = S_color
+                    case ['D']:
+                        color = D_color
+                    case ['F']:
+                        color = F_color
+                break
+
 
         pygame.draw.circle(view, color, 
             CENTER, current_radius, width=3) 
@@ -120,7 +138,9 @@ class Target():
             y = CENTER[1]
             angle = random.uniform(0, 2*math.pi)
             center_distance = math.sqrt(math.pow((x-CENTER[0]),2) + math.pow((y-CENTER[1]),2))
-            speed = randint(-2, 2)
+            speed = randint(-1, 3)
+            if speed == 0:
+                speed = 1
 
             # while True:                
             #     x = random.randrange(0, WIDTH, 1)
@@ -130,22 +150,7 @@ class Target():
 
             type = random.sample(set('ASDF'), 1)
             ball_coordinates += tuple([(center_distance,angle,type,speed,i)])
-        print(ball_coordinates)
-        
-        
-
-
-
         # print(ball_coordinates)
-        #for x,y,c,t in ball_coordinates: print(x,y,c,t)
-
-
-
-
-        # self.image = load('images/inimigo_1.png')
-        # self.rect = self.image.get_rect(
-        #     center=(400, 300)
-        # )
 
     def update(self):
         global orbits
@@ -168,7 +173,7 @@ class Target():
                 case ['F']:
                     color = F_color
             if center<current_radius:
-                #x = CENTER[0] - ((index+1)*orbit_space)*pow(math.cos(orbits+angle),2)
+                # x = CENTER[0] - ((index+1)*orbit_space)*pow(math.cos(orbits+angle),2)
                 #y = CENTER[1] - ((index+1)*orbit_space)*pow(math.sin(orbits+angle),2)
                 x = CENTER[0] - ((index+1)*orbit_space)*math.cos((orbits+angle)*speed)
                 y = CENTER[1] - ((index+1)*orbit_space)*math.sin((orbits+angle)*speed)
@@ -188,6 +193,19 @@ ball_target = Target()
 clock = Clock()
 frame = 0
 
+def key_action(key):
+    global ball_coordinates
+    global current_radius
+    global score
+    for center, angle, type, speed, index in ball_coordinates:
+        if center>current_radius-key_tolerance:
+            if ['{}'.format(key)] == type:
+                print('Ganhô: {}'.format(key))
+                score += 1
+            else:
+                print('Errou {} -> {}!'.format(key, type))
+            break
+
 while True:
     clock.tick(fps)
 
@@ -203,13 +221,17 @@ while True:
 
         if evento.type == KEYUP:
             if evento.key == K_a:
-                print('A')
+                key_action('A')
+                #print('A')
             if evento.key == K_s:
-                print('S')
+                key_action('S')
+                #print('S')
             if evento.key == K_d:
-                print('D')
+                key_action('D')
+                #print('D')
             if evento.key == K_f:
-                print('F')
+                key_action('F')
+                #print('F')
     
     frame +=1
     main_circle.update()
